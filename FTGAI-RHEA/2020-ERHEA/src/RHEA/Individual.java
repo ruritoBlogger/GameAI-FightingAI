@@ -23,8 +23,6 @@ import RHEA.Heuristics.*;
 import RHEA.utils.ParameterSet;
 import struct.FrameData;
 
-
-
 public class Individual implements Comparable {
 
     private Gene[] genes; // actions in individual. length of individual = actions.length
@@ -39,7 +37,7 @@ public class Individual implements Comparable {
 
     int nCalls;
 
-    static protected double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
+    static protected double[] bounds = new double[] { Double.MAX_VALUE, -Double.MAX_VALUE };
 
     Individual(int nActions, Random gen, StateHeuristic heuristic, RollingHorizonPlayer player, RHEAAgent agent) {
         this.heuristic = heuristic;
@@ -47,61 +45,63 @@ public class Individual implements Comparable {
         this.nActions = nActions;
         this.player = player;
         this.agent = agent;
-//        this.value = new StatSummary();
+        // this.value = new StatSummary();
         this.diversityScore = 0;
         this.value = new LinkedList<Double>();
 
         genes = new Gene[agent.getParameters().SIMULATION_DEPTH];
         canMut = true;
         for (int i = 0; i < genes.length; i++) {
-            if (nActions <= 1)  {nActions = 1; canMut = false;}
+            if (nActions <= 1) {
+                nActions = 1;
+                canMut = false;
+            }
             genes[i] = new Gene(randomGenerator, player.params.INNER_MACRO_ACTION_LENGTH, i);
         }
-        
-        
+
     }
 
     /**
-     * Evaluates an individual by rolling the current state with the actions in the individual
-     * and returning the value of the resulting state; random action chosen for the opponent
+     * Evaluates an individual by rolling the current state with the actions in the
+     * individual and returning the value of the resulting state; random action
+     * chosen for the opponent
+     * 
      * @param state - current state, root of rollouts
      * @return - number of FM calls used during this call
      */
-    int evaluate(GeneralInformation gi, ParameterSet params, TreeNode statsTree, BanditArray bandits, int[] actionDist) {
+    int evaluate(GeneralInformation gi, ParameterSet params, TreeNode statsTree, BanditArray bandits,
+            int[] actionDist) {
         nCalls = 0;
-       
+
         FrameData o_fd = gi.getFrameData();
-        rollout(gi, actionDist, params);  // Very Important Here for evaluation
-       
-       
+        rollout(gi, actionDist, params); // Very Important Here for evaluation
+
         double reward;
         if (params.ROLLOUTS) {
-            reward = MCrollouts(gi,params);
+            reward = MCrollouts(gi, params);
         } else {
             reward = heuristic.evaluateState(gi);
         }
-        
+
         // back to original
         gi.setFrameData(o_fd);
-        
-        
-       
 
         // Apply discount factor
-//        reward *= Math.pow(params.DISCOUNT,params.SIMULATION_DEPTH*params.INNER_MACRO_ACTION_LENGTH);
+        // reward *=
+        // Math.pow(params.DISCOUNT,params.SIMULATION_DEPTH*params.INNER_MACRO_ACTION_LENGTH);
 
         // bounds
-        if(reward < bounds[0])
+        if (reward < bounds[0])
             bounds[0] = reward;
-        if(reward > bounds[1])
+        if (reward > bounds[1])
             bounds[1] = reward;
-        
-//        reward = Operations.normalise(reward, bounds[0], bounds[1]);
+
+        // reward = Operations.normalise(reward, bounds[0], bounds[1]);
         double delta = updateReward(reward);
- 
+
         // Update bandits; No bandits for inner macro-actions
         if (params.BANDIT_MUTATION) {
-            for (BanditGene bg: bandits.genome) {
+            for (BanditGene bg : bandits.genome) {
                 bg.applyReward(delta);
                 if (bg.revertOrKeep(delta)) {
                     genes[bg.index].setAction(bg.x, null, 0);
@@ -110,23 +110,23 @@ public class Individual implements Comparable {
         }
 
         // Update tree
-        int[] actions = new int[params.SIMULATION_DEPTH*params.INNER_MACRO_ACTION_LENGTH];
+        int[] actions = new int[params.SIMULATION_DEPTH * params.INNER_MACRO_ACTION_LENGTH];
         for (int k = 0; k < params.SIMULATION_DEPTH; k++) {
-            System.arraycopy(genes[k].getMacroAction(), 0, actions, k * params.INNER_MACRO_ACTION_LENGTH, params.INNER_MACRO_ACTION_LENGTH);
+            System.arraycopy(genes[k].getMacroAction(), 0, actions, k * params.INNER_MACRO_ACTION_LENGTH,
+                    params.INNER_MACRO_ACTION_LENGTH);
         }
         if (params.TREE)
             statsTree.rollout(actions, getValue());
-        
-        
+
         return nCalls;
     }
 
     // Returns delta (diff between previous value and new one)
     double updateReward(double reward) {
-    // Update individual value
+        // Update individual value
         this.value.add(reward);
         double avgValue = getValue();
-//      System.out.println("avgValue:"+avgValue);
+        // System.out.println("avgValue:"+avgValue);
         return reward - avgValue;
     }
 
@@ -137,20 +137,20 @@ public class Individual implements Comparable {
     }
 
     private void rollout(GeneralInformation start, int[] actionDist, ParameterSet params) {
-     
+
         Deque<Action> myActs = new LinkedList<Action>();
         for (int i = 0; i < params.SIMULATION_DEPTH; i++) {
             for (int m = 0; m < params.INNER_MACRO_ACTION_LENGTH; m++) {
-                    int action = genes[i].getMacroAction()[m];
-                    if (i==0) myActs.add(player.getStartActionMapping(action));
-                    else myActs.add(player.getContinueActionMapping(action));
-                    nCalls += params.MACRO_ACTION_LENGTH;
+                int action = genes[i].getMacroAction()[m];
+                if (i == 0)
+                    myActs.add(player.getStartActionMapping(action));
+                else
+                    myActs.add(player.getContinueActionMapping(action));
+                nCalls += params.MACRO_ACTION_LENGTH;
             }
         }
         player.advanceState(start, myActs, start.getFrameData().getCharacter(!start.getMyPlayer()).getAction());
-       
 
-        
     }
 
     // Monte Carlo rollouts
@@ -175,7 +175,7 @@ public class Individual implements Comparable {
             }
             double thisReward = heuristic.evaluateState(start);
             reward += thisReward;
-            
+
             start.setFrameData(o);
         }
         reward /= params.REPEAT_ROLLOUT;
@@ -187,11 +187,11 @@ public class Individual implements Comparable {
         double diff = 0;
 
         int[] actionSequence = getActions();
-        double maxCount = player.params.POPULATION_SIZE +
-                (population.numGenerations-1) * (player.params.POPULATION_SIZE - player.params.ELITISM);
+        double maxCount = player.params.POPULATION_SIZE
+                + (population.numGenerations - 1) * (player.params.POPULATION_SIZE - player.params.ELITISM);
 
-        HashMap<Integer,Integer>[] actionCountAllGen = population.getActionCountAllGen();
-        HashMap<Integer,Integer> posCellCountAllGen = population.getPosCellCountAllGen();
+        HashMap<Integer, Integer>[] actionCountAllGen = population.getActionCountAllGen();
+        HashMap<Integer, Integer> posCellCountAllGen = population.getPosCellCountAllGen();
 
         for (int i = 0; i < actionSequence.length; i++) {
             if (player.params.DIVERSITY_TYPE == DIVERSITY_GENOTYPE) {
@@ -206,29 +206,30 @@ public class Individual implements Comparable {
 
         diff /= (player.params.SIMULATION_DEPTH * player.params.INNER_MACRO_ACTION_LENGTH);
 
-        return 1-diff;
+        return 1 - diff;
     }
-
-   
 
     /**
      * Return the value of this individual from the StatSummary object
+     * 
      * @return - the mean value by default
      */
     double getValue() {
-          
-          return value.getLast();
-//         return Operations.normalise(value.getLast(), bounds[0], bounds[1]);
+
+        return value.getLast();
+        // return Operations.normalise(value.getLast(), bounds[0], bounds[1]);
     }
 
     /**
      * Reset the value of this individual
      */
-    void resetValue() { value.clear(); }
-
+    void resetValue() {
+        value.clear();
+    }
 
     /**
      * Return the value of this individual from the StatSummary object
+     * 
      * @return - the mean value by default
      */
     double getDiversityScore() {
@@ -239,11 +240,11 @@ public class Individual implements Comparable {
         genes[idx].setAction(singleAction, null, idxMacro);
     }
 
-    void setGene (int idx, Gene g) {
+    void setGene(int idx, Gene g) {
         genes[idx].setGene(g);
     }
 
-    void setGene (int idx) {
+    void setGene(int idx) {
         genes[idx].randomActions(player.params.INNER_MACRO_ACTION_LENGTH);
     }
 
@@ -264,9 +265,9 @@ public class Individual implements Comparable {
     }
 
     /**
-     * Mutate this individual (no new individual is created)
-     * Select which gene to mutate and let the gene decide what to mutate to.
-     * Use default mutation (one random gene mutated uniformly at random)
+     * Mutate this individual (no new individual is created) Select which gene to
+     * mutate and let the gene decide what to mutate to. Use default mutation (one
+     * random gene mutated uniformly at random)
      */
     void mutate(Population population) {
         int no_mutations = player.params.MUTATION;
@@ -275,7 +276,7 @@ public class Individual implements Comparable {
             while (count < no_mutations) {
 
                 int idxGene; // index of gene to mutate
-                int idxActionToMutate = -1; //index of action to mutate
+                int idxActionToMutate = -1; // index of action to mutate
 
                 if (player.params.MUT_BIAS) {
                     // bias mutations towards the beginning of the array of individuals, softmax
@@ -321,9 +322,8 @@ public class Individual implements Comparable {
                     int[] actionSequence = getActions();
                     for (int i = 0; i < actionSequence.length; i++) {
                         int idxG = i / player.params.INNER_MACRO_ACTION_LENGTH;
-                        int idxAction = i % player.params.INNER_MACRO_ACTION_LENGTH;                  
-                        
-                          
+                        int idxAction = i % player.params.INNER_MACRO_ACTION_LENGTH;
+
                     }
 
                     // find gene with actionIdx
@@ -335,15 +335,15 @@ public class Individual implements Comparable {
                     idxGene = randomGenerator.nextInt(genes.length);
                 }
 
-                genes[idxGene].mutate(population, player.params.MUT_DIVERSITY, player.params.DIVERSITY_TYPE, idxGene, idxActionToMutate); // gene decides what the new value is
+                genes[idxGene].mutate(population, player.params.MUT_DIVERSITY, player.params.DIVERSITY_TYPE, idxGene,
+                        idxActionToMutate); // gene decides what the new value is
                 count++;
             }
         }
     }
 
     /**
-     * Mutate this individual (no new individual is created)
-     * Use bandit mutation
+     * Mutate this individual (no new individual is created) Use bandit mutation
      */
     void banditMutate(BanditArray bandits) {
         if (canMut) {
@@ -355,6 +355,7 @@ public class Individual implements Comparable {
 
     /**
      * Sets the actions of this individual to a new array of actions.
+     * 
      * @param a - new array of actions.
      */
     private void setGenes(Gene[] a) {
@@ -367,10 +368,10 @@ public class Individual implements Comparable {
     @Override
     public int compareTo(Object o) {
         Individual a = this;
-        Individual b = (Individual)o;
+        Individual b = (Individual) o;
 
-//        double valueA = a.getValue();
-//        double valueB = b.getValue();
+        // double valueA = a.getValue();
+        // double valueB = b.getValue();
         double valueA = Operations.normalise(a.getValue(), bounds[0], bounds[1]);
         double valueB = Operations.normalise(b.getValue(), bounds[0], bounds[1]);
         double diversityA = a.getDiversityScore();
@@ -378,28 +379,33 @@ public class Individual implements Comparable {
 
         double fitnessA, fitnessB;
 
-        fitnessA = valueA * (1-a.player.params.D) + diversityA * a.player.params.D;
-        fitnessB = valueB * (1-b.player.params.D) + diversityB * b.player.params.D;
-        
-        if (fitnessA < fitnessB) return 1;
-        else if (fitnessA > fitnessB) return -1;
-        else return 0;
+        fitnessA = valueA * (1 - a.player.params.D) + diversityA * a.player.params.D;
+        fitnessB = valueB * (1 - b.player.params.D) + diversityB * b.player.params.D;
+
+        if (fitnessA < fitnessB)
+            return 1;
+        else if (fitnessA > fitnessB)
+            return -1;
+        else
+            return 0;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Individual)) return false;
+        if (!(o instanceof Individual))
+            return false;
 
         Individual a = this;
-        Individual b = (Individual)o;
+        Individual b = (Individual) o;
 
         for (int i = 0; i < genes.length; i++) {
-            if (a.genes[i] != b.genes[i]) return false;
+            if (a.genes[i] != b.genes[i])
+                return false;
         }
         return true;
     }
 
-    public Individual copy () {
+    public Individual copy() {
         Individual a = new Individual(this.nActions, this.randomGenerator, this.heuristic, this.player, this.agent);
         a.value = this.value;
         a.diversityScore = this.diversityScore;
@@ -412,12 +418,13 @@ public class Individual implements Comparable {
     @Override
     public String toString() {
         double value = getValue();
-        String s = "Value = " + String.format("%.2f", value) + ": NormValue = " + String.format("%.2f", Operations.normalise(value, bounds[0], bounds[1])) + ": DiversityScore = " +
-                String.format("%.2f", diversityScore) + ": Actions = ";
+        String s = "Value = " + String.format("%.2f", value) + ": NormValue = "
+                + String.format("%.2f", Operations.normalise(value, bounds[0], bounds[1])) + ": DiversityScore = "
+                + String.format("%.2f", diversityScore) + ": Actions = ";
 
-
-        for (Gene action : genes) s += action + " ";
-        s+= "lower:" + bounds[0] + " upper:" + bounds[1];
+        for (Gene action : genes)
+            s += action + " ";
+        s += "lower:" + bounds[0] + " upper:" + bounds[1];
         return s;
     }
 

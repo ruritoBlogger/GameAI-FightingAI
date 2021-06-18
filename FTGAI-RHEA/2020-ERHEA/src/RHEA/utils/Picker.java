@@ -38,7 +38,8 @@ public class Picker<T> {
             bestScore = score;
             bestYet = value;
         } else {
-            // System.out.println(order * score + " >? " + bestScore * order + " : " + (order * score > bestScore * order));
+            // System.out.println(order * score + " >? " + bestScore * order + " : " +
+            // (order * score > bestScore * order));
             if (order * score > bestScore * order) {
                 bestScore = score;
                 bestYet = value;
@@ -51,7 +52,7 @@ public class Picker<T> {
         return bestYet;
     }
 
-    public Double getBestScore () {
+    public Double getBestScore() {
         return bestScore;
     }
 

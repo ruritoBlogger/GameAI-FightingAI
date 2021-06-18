@@ -47,8 +47,7 @@ public class Population {
 	/**
 	 * Constructor to initialize population
 	 * 
-	 * @param stateObs
-	 *            - StateObservation of current game tick
+	 * @param stateObs - StateObservation of current game tick
 	 */
 	Population(RHEAAgent agent, RollingHorizonPlayer player, int budget) {
 		this.agent = agent;
@@ -159,14 +158,12 @@ public class Population {
 	}
 
 	/**
-	 * One Step Look Ahead initialization. For the first individual, roll the
-	 * state with best action at each step Rest of the individuals are mutations
-	 * of the first
+	 * One Step Look Ahead initialization. For the first individual, roll the state
+	 * with best action at each step Rest of the individuals are mutations of the
+	 * first
 	 * 
-	 * @param stateObs
-	 *            - current StateObservation
-	 * @param heuristic
-	 *            - Heuristic used by the 1SLA
+	 * @param stateObs  - current StateObservation
+	 * @param heuristic - Heuristic used by the 1SLA
 	 * @return - number of FM calls used in this method
 	 */
 	int initOneStep(GeneralInformation gi, StateHeuristic heuristic) {
@@ -216,12 +213,11 @@ public class Population {
 	}
 
 	/**
-	 * Monte Carlo Tree Search initialization. For the first individual, use
-	 * MCTS with half budget to find solution Rest of the individuals are
-	 * mutations of the first
+	 * Monte Carlo Tree Search initialization. For the first individual, use MCTS
+	 * with half budget to find solution Rest of the individuals are mutations of
+	 * the first
 	 * 
-	 * @param stateObs
-	 *            - current StateObservation
+	 * @param stateObs - current StateObservation
 	 * @return - number of FM calls used in this method
 	 */
 	int initMCTS(GeneralInformation gi) {
@@ -265,8 +261,7 @@ public class Population {
 	 * Shift buffer. Shift population to the left (and trees and bandits), add
 	 * random action at the end of all individuals
 	 * 
-	 * @param lastAct
-	 *            - the action that was played in previous game tick
+	 * @param lastAct - the action that was played in previous game tick
 	 */
 	void shiftLeft(int lastAct) {
 		numGenerations = 0; // reset gens
@@ -340,16 +335,14 @@ public class Population {
 		}
 
 		// remove diversity measure for recommendation policy
-		if (params.ADD_DIVERSITY_FIT){
+		if (params.ADD_DIVERSITY_FIT) {
 			Arrays.sort(population);
-		}
-		else{
+		} else {
 			double aux = params.D;
 			params.D = 0;
 			Arrays.sort(population);
 			params.D = aux;
 		}
-		
 
 		return population[0].getGene(0).getFirstAction();
 	}
@@ -373,17 +366,16 @@ public class Population {
 	/**
 	 * Move to the next generation through crossover and mutation
 	 * 
-	 * @param stateObs
-	 *            - StateObservation of current game tick
+	 * @param stateObs - StateObservation of current game tick
 	 * @return - number of FM calls during this call of the method
 	 */
 	int nextGeneration(GeneralInformation gi) {
 		numGenerations++;
-       
+
 		int nCalls = 0;
 		Individual[] nextGenome = new Individual[params.POPULATION_SIZE];
-//		Individual[] nextGenome = population.clone();
-		
+		// Individual[] nextGenome = population.clone();
+
 		Arrays.sort(population); // sort population
 
 		for (int i = 0; i < population.length; i++) {
@@ -391,11 +383,11 @@ public class Population {
 															// promoted through
 															// elitism are
 															// copied directly
-				//±£´æ×îºÃµÄ¼¸¸ö
+				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÃµÄ¼ï¿½ï¿½ï¿½
 				nextGenome[i] = population[i].copy();
 			} else {
 				// System.out.println("pop size:"+population.length);
-				//ÕÒÒ»¸öÈÝÆ÷
+				// ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				Individual newInd = population[0].copy();
 
 				// Crossover
@@ -410,7 +402,7 @@ public class Population {
 				nCalls += evaluate(newInd, gi, false);
 
 				// Insert new individual into population
-				//Èç¹û´óÓÚ1¸ö¾Í¸³Öµ
+				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½Í¸ï¿½Öµ
 				if (!params.isRMHC())
 					nextGenome[i] = newInd;
 				else {
@@ -425,7 +417,7 @@ public class Population {
 				addToActionCountAllGen(newInd);
 				// addToPosCellCountAllGen(newInd);
 			}
-			
+
 		}
 
 		// Assign new population
@@ -459,10 +451,8 @@ public class Population {
 	/**
 	 * Evaluate a certain individual in the population, passed through index
 	 * 
-	 * @param idx
-	 *            - index of individual to be evaluated
-	 * @param stateObs
-	 *            - StateObservation of current game tick
+	 * @param idx      - index of individual to be evaluated
+	 * @param stateObs - StateObservation of current game tick
 	 * @return - FM calls used up in this method call
 	 */
 	int evaluate(int idx, GeneralInformation gi, boolean evaluateAll) {
@@ -484,13 +474,13 @@ public class Population {
 				// compare this individual to all the others in the population
 				diversityScore += aGenome.diversityDiff(this);
 				// update diversity score
-//				int f_score =  evaluate(aGenome, gi, false);
-//				System.out.println("f_score:" + f_score + ", diversity:" + diversityScore);
-//				diversityScore = (1 - params.D) * f_score + params.D * diversityScore;
+				// int f_score = evaluate(aGenome, gi, false);
+				// System.out.println("f_score:" + f_score + ", diversity:" + diversityScore);
+				// diversityScore = (1 - params.D) * f_score + params.D * diversityScore;
 				diversityScore /= population.length - 1;
-				//¸üÐÂ·ÖÊý
-				System.out.println("totalDiver:" +  diversityScore);
-			
+				// ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½
+				System.out.println("totalDiver:" + diversityScore);
+
 				aGenome.updateDiversityScore(diversityScore);
 			}
 		}
@@ -501,8 +491,7 @@ public class Population {
 	/**
 	 * Evaluate all individuals in the population
 	 * 
-	 * @param stateObs
-	 *            - StateObservation of current game tick
+	 * @param stateObs - StateObservation of current game tick
 	 * @return - FM calls used up in this method call
 	 */
 	int evaluateAll(GeneralInformation gi, int budget) {
@@ -532,9 +521,8 @@ public class Population {
 	/**
 	 * Mutates an individual using the correct mutation oeprator
 	 * 
-	 * @param newInd
-	 *            - individual to be mutated (if null, the first in the
-	 *            population)
+	 * @param newInd - individual to be mutated (if null, the first in the
+	 *               population)
 	 * @return - budget left after the mutation and evaluation of new individual
 	 */
 	private void mutation(Individual newInd) {
@@ -546,8 +534,7 @@ public class Population {
 	}
 
 	/**
-	 * Performs crossover throug tournament between individuals in the
-	 * population
+	 * Performs crossover throug tournament between individuals in the population
 	 * 
 	 * @return - new individual resulting from crossover
 	 */
@@ -556,44 +543,44 @@ public class Population {
 		Individual newInd = new Individual(player.start_nActions, player.random, heuristic, player, agent);
 		Individual[] parents = new Individual[params.NO_PARENTS];
 		Random rand = new Random();
-		// Get parents for crossover. Tournament if possible.Ñ¡¸¸Ä¸
-		//ÕâÀï¿ÉÒÔµ÷£¿£¿£¿
+		// Get parents for crossover. Tournament if possible.Ñ¡ï¿½ï¿½Ä¸
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (params.canTournament()) {
 			int index = 0;
 			Arrays.sort(population);
-			if(params.ELITISM == 1) {
+			if (params.ELITISM == 1) {
 				parents[0] = population[0].copy();
-			}
-			else {
+			} else {
 				index = rand.nextInt(params.ELITISM);
 				parents[0] = population[index].copy();
 			}
 			index = rand.nextInt(params.POPULATION_SIZE - params.ELITISM);
 			index = index + params.ELITISM;
 			parents[1] = population[index].copy();
-//			Individual[] tournament = new Individual[params.TOURNAMENT_SIZE];
-//			ArrayList<Individual> list = new ArrayList<>();
-//			list.addAll(Arrays.asList(population).subList(0, params.POPULATION_SIZE));
-//			Collections.shuffle(list);
-//			for (int i = 0; i < params.TOURNAMENT_SIZE; i++) {
-//				tournament[i] = list.get(i);
-//			}
-//			try {
-//				Arrays.sort(tournament);
-//			} catch (NullPointerException e) {
-//				System.out.println(
-//						"Population.crossover() call. Null values in population. This should not be happening.");
-//				e.printStackTrace();
-//			}
-//			parents[0] = tournament[0];
-//			parents[1] = tournament[1];
+			// Individual[] tournament = new Individual[params.TOURNAMENT_SIZE];
+			// ArrayList<Individual> list = new ArrayList<>();
+			// list.addAll(Arrays.asList(population).subList(0, params.POPULATION_SIZE));
+			// Collections.shuffle(list);
+			// for (int i = 0; i < params.TOURNAMENT_SIZE; i++) {
+			// tournament[i] = list.get(i);
+			// }
+			// try {
+			// Arrays.sort(tournament);
+			// } catch (NullPointerException e) {
+			// System.out.println(
+			// "Population.crossover() call. Null values in population. This should not be
+			// happening.");
+			// e.printStackTrace();
+			// }
+			// parents[0] = tournament[0];
+			// parents[1] = tournament[1];
 		} else {
 			parents[0] = population[0];
 			parents[1] = population[1];
 		}
 
 		// Perform crossover, return resulting individual
-		//Ëæ»ú½øÐÐ½»²æÅä¶Ô
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (params.CROSSOVER_TYPE == POINT1_CROSS) {
 			// 1-point
 			int p = player.random.nextInt(params.SIMULATION_DEPTH - 3) + 1;

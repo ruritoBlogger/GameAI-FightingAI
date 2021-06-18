@@ -1,6 +1,5 @@
 package RHEA.utils;
 
- 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 
@@ -15,9 +14,7 @@ public class ElapsedCpuTimer {
         oldTime = getTime();
     }
 
-
-    public ElapsedCpuTimer copy()
-    {
+    public ElapsedCpuTimer copy() {
         ElapsedCpuTimer newCpuTimer = new ElapsedCpuTimer();
         newCpuTimer.maxTime = this.maxTime;
         newCpuTimer.oldTime = this.oldTime;
@@ -29,7 +26,6 @@ public class ElapsedCpuTimer {
         return getTime() - oldTime;
     }
 
-
     public long elapsedNanos() {
         return elapsed();
     }
@@ -39,24 +35,22 @@ public class ElapsedCpuTimer {
     }
 
     public double elapsedSeconds() {
-        return elapsedMillis()/1000.0;
+        return elapsedMillis() / 1000.0;
     }
 
     public double elapsedMinutes() {
-        return elapsedMillis()/1000.0/60.0;
+        return elapsedMillis() / 1000.0 / 60.0;
     }
-
 
     public double elapsedHours() {
-        return elapsedMinutes()/60.0;
+        return elapsedMinutes() / 60.0;
     }
 
-
     @Override
-	public String toString() {
+    public String toString() {
         // now resets the timer...
         String ret = elapsed() / 1000000.0 + " ms elapsed";
-        //reset();
+        // reset();
         return ret;
     }
 
@@ -66,7 +60,7 @@ public class ElapsedCpuTimer {
 
     private long getCpuTime() {
 
-        if(System.getProperty("os.name").contains("Windows"))
+        if (System.getProperty("os.name").contains("Windows"))
             return System.nanoTime();
 
         if (bean.isCurrentThreadCpuTimeSupported()) {
@@ -82,8 +76,7 @@ public class ElapsedCpuTimer {
 
     }
 
-    public long remainingTimeMillis()
-    {
+    public long remainingTimeMillis() {
         long diff = maxTime - elapsed();
         return (long) (diff / 1000000.0);
     }

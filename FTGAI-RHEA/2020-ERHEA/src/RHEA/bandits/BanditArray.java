@@ -1,4 +1,5 @@
 package RHEA.bandits;
+
 import RHEA.Individual;
 import RHEA.utils.Picker;
 
@@ -8,7 +9,6 @@ import java.util.Random;
 /**
  * Created by simonmarklucas on 27/05/2016.
  */
-
 
 public class BanditArray {
 
@@ -26,7 +26,7 @@ public class BanditArray {
 
         for (int i = 0; i < nBandits; i++) {
             int[] acts = new int[population.length];
-            for (int j=0; j < population.length; j++) {
+            for (int j = 0; j < population.length; j++) {
                 acts[j] = population[j].getGene(i).getFirstAction();
             }
             genome.add(new BanditGene(i, acts, N_ACTIONS));
@@ -53,20 +53,20 @@ public class BanditArray {
     }
 
     public void shiftArray(Individual[] population, int N_ACTIONS, double discount) {
-        //remove first gene
+        // remove first gene
         genome.remove(0);
 
-        //apply discount to previous rewards
+        // apply discount to previous rewards
         if (discount < 1) {
             for (BanditGene bg : genome) {
                 bg.applyDiscountToAll(discount);
             }
         }
 
-        //add the new gene
+        // add the new gene
         int i = nBandits - 1;
         int[] acts = new int[population.length];
-        for (int j=0; j < population.length; j++) {
+        for (int j = 0; j < population.length; j++) {
             acts[j] = population[j].getGene(i).getFirstAction();
         }
 

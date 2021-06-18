@@ -1,4 +1,5 @@
 package RHEA.bandits;
+
 import RHEA.utils.Picker;
 
 import java.util.Random;
@@ -7,7 +8,7 @@ import java.util.Random;
  * Created by simonmarklucas on 27/05/2016.
  *
  *
- *  Idea is to keep track of which changes lead to an improvement
+ * Idea is to keep track of which changes lead to an improvement
  *
  */
 public class BanditGene {
@@ -57,7 +58,7 @@ public class BanditGene {
                 double explore = explore(nPulls, armPulls[i]);
                 // small random numbers: break ties in unexpanded nodes
                 double noise = random.nextDouble() * eps;
-//                 System.out.format("%d\t %.2f\t %.2f\n", i, exploit, explore);
+                // System.out.format("%d\t %.2f\t %.2f\n", i, exploit, explore);
                 picker.add(exploit + explore + noise, i);
             }
         }
@@ -70,14 +71,14 @@ public class BanditGene {
 
     private double maxDelta() {
         double max = Double.NEGATIVE_INFINITY;
-        for (double d : deltaRewards)  max = max<=d? d: max;
+        for (double d : deltaRewards)
+            max = max <= d ? d : max;
         return max;
     }
 
     double urgency(int n) {
         return rescue() + explore(n, nMutations);
     }
-
 
     // in bandit terms this would normally be called the exploit term
     // but in an EA we need to use it in the opposite sense
@@ -92,10 +93,10 @@ public class BanditGene {
     private double explore(int n, int nA) {
         return k * Math.sqrt(Math.log(n) / (nA));
     }
+
     private double exploit(int i) {
         return deltaRewards[i];
     }
-
 
     public void applyReward(double delta) {
         if (x != xPrevious)
@@ -123,7 +124,7 @@ public class BanditGene {
     }
 
     String statusString() {
-        return String.format("%d\t rescue: %.2f\t explore: %.2f\t urgency: %.2f",
-                x, rescue(), explore(nPulls, nMutations), urgency(nPulls));
+        return String.format("%d\t rescue: %.2f\t explore: %.2f\t urgency: %.2f", x, rescue(),
+                explore(nPulls, nMutations), urgency(nPulls));
     }
 }

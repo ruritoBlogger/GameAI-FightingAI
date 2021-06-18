@@ -18,21 +18,14 @@ import struct.CharacterData;
 import struct.FrameData;
 import struct.Key;
 
-
-
-
 public class ThunderSimFighting extends Fighting {
 
-	 
 	private ArrayList<Deque<Key>> inputKeys;
 
-	 
 	private ArrayList<Deque<Action>> inputActions;
 
-	 
 	private CommandCenter[] commandCenter;
 
-	 
 	public ThunderSimFighting() {
 		this.playerCharacters = new Character[2];
 		this.projectileDeque = new LinkedList<LoopEffect>();
@@ -46,15 +39,11 @@ public class ThunderSimFighting extends Fighting {
 	/**
 	 * 初期化処理を行う．
 	 *
-	 * @param motionList
-	 *            P1とP2のモーションを格納したリスト
-	 * @param actionList
-	 *            P1とP2のアクションを格納したリスト
-	 * @param frameData
-	 *            frame data at the start of simulation
-	 * @param playerNumber
-	 *            boolean value which identifies P1/P2. {@code true} if the
-	 *            player is P1, or {@code false} if P2.
+	 * @param motionList   P1とP2のモーションを格納したリスト
+	 * @param actionList   P1とP2のアクションを格納したリスト
+	 * @param frameData    frame data at the start of simulation
+	 * @param playerNumber boolean value which identifies P1/P2. {@code true} if the
+	 *                     player is P1, or {@code false} if P2.
 	 */
 	public void initialize(ArrayList<ArrayList<Motion>> motionList, ArrayList<Deque<Action>> actionList,
 			FrameData frameData, boolean playerNumber) {
@@ -85,8 +74,7 @@ public class ThunderSimFighting extends Fighting {
 	 * <li>キャラクターの状態の更新</li>
 	 * </ol>
 	 *
-	 * @param currentFrame
-	 *            現在のフレーム
+	 * @param currentFrame 現在のフレーム
 	 */
 	public void processingFight(int currentFrame) {
 		// 1. コマンドの実行・対戦処理
@@ -119,7 +107,7 @@ public class ThunderSimFighting extends Fighting {
 				keyList.add(new Key(this.playerCharacters[i].getInputCommand().getFirst()));
 
 				Action act = this.commandTable.interpretationCommandFromKey(this.playerCharacters[i], temp);
-				//if(act==Action.STAND_D_DF_FC) {System.err.println("simtest FC 1");}
+				// if(act==Action.STAND_D_DF_FC) {System.err.println("simtest FC 1");}
 				if (ableAction(this.playerCharacters[i], act)) {
 					this.playerCharacters[i].runAction(act, true);
 				}
@@ -137,12 +125,14 @@ public class ThunderSimFighting extends Fighting {
 				}
 
 				this.inputKeys.get(i).add(this.commandCenter[i].getSkillKey());
-//				if(this.inputKeys.get(i).getLast().C){System.err.println("ISC");}
+				// if(this.inputKeys.get(i).getLast().C){System.err.println("ISC");}
 				Action act = this.commandTable.interpretationCommandFromKey(this.playerCharacters[i], keyList);
-				if(this.inputKeys.get(i).getLast().C) {act=Action.STAND_D_DF_FC;}//本家シミュレータだとC押しができないっぽいバグに対応
-//				if(act==Action.STAND_D_DF_FA) {System.err.println("simtest STAND_D_DF_FA");}
-//				if(act==Action.STAND_D_DF_FC) {System.err.println("simtest FC");}
-				//if(act==Action.STAND_F_D_DFB) {System.err.println("simtest STAND_F_D_DFB");}
+				if (this.inputKeys.get(i).getLast().C) {
+					act = Action.STAND_D_DF_FC;
+				} // 本家シミュレータだとC押しができないっぽいバグに対応
+				// if(act==Action.STAND_D_DF_FA) {System.err.println("simtest STAND_D_DF_FA");}
+				// if(act==Action.STAND_D_DF_FC) {System.err.println("simtest FC");}
+				// if(act==Action.STAND_F_D_DFB) {System.err.println("simtest STAND_F_D_DFB");}
 				if (ableAction(this.playerCharacters[i], act)) {
 					this.playerCharacters[i].runAction(act, true);
 				}

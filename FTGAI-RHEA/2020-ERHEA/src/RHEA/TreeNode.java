@@ -22,7 +22,7 @@ public class TreeNode {
     boolean chosen;
 
     private static int count = 0;
-    static String[] actColors = new String[]{"red", "blue", "black", "green", "orange", "purple"};
+    static String[] actColors = new String[] { "red", "blue", "black", "green", "orange", "purple" };
 
     private Random gen;
 
@@ -31,8 +31,8 @@ public class TreeNode {
         this.value = value;
         chosen = false;
         nVisits = 1;
-        if(parent != null)
-            m_depth = parent.m_depth+1;
+        if (parent != null)
+            m_depth = parent.m_depth + 1;
         else {
             m_depth = 0;
             count = 0;
@@ -56,7 +56,7 @@ public class TreeNode {
         return children[action];
     }
 
-    public void rollout (int[] individual, double value) {
+    public void rollout(int[] individual, double value) {
         TreeNode current = this;
         for (int i = 0; i < individual.length; i++) {
             current.addChild(individual[i], value);
@@ -64,7 +64,7 @@ public class TreeNode {
         }
     }
 
-    public void markChosen (int[] individual) {
+    public void markChosen(int[] individual) {
         TreeNode cur = this;
         for (int i = 0; i < individual.length; i++) {
             cur = cur.children[individual[i]];
@@ -125,24 +125,28 @@ public class TreeNode {
         return this.children[lastAct];
     }
 
-
     private boolean hasChildren() {
         for (TreeNode aChildren : children) {
-            if (aChildren != null) return true;
+            if (aChildren != null)
+                return true;
         }
         return false;
     }
+
     private TreeNode getFirstChild() {
         for (int i = 0; i < children.length; i++) {
-            if (children[i] != null) return children[i];
+            if (children[i] != null)
+                return children[i];
         }
         return null;
     }
+
     private TreeNode getNextSibling() {
         if (parent != null) {
             int index = -1;
             for (int i = 0; i < parent.children.length; i++) {
-                if (parent.children[i] == null) continue;
+                if (parent.children[i] == null)
+                    continue;
                 if (parent.children[i].equals(this)) {
                     index = i;
                     break;
@@ -150,7 +154,8 @@ public class TreeNode {
             }
             if (index != -1) {
                 for (int i = index + 1; i < parent.children.length; i++) {
-                    if (parent.children[i] != null) return parent.children[i];
+                    if (parent.children[i] != null)
+                        return parent.children[i];
                 }
             }
         }
@@ -159,22 +164,24 @@ public class TreeNode {
 
     @Override
     public String toString() {
-        int idxp = parent == null? -1 : parent.idx;
-//        return "[i=" + idx + ", q=" + value + ", n=" + nVisits + ", p=" + idxp + ", d=" + m_depth + "]";
-//        return "[" + idx + "," + String.format("%.2f", value) + "," + nVisits + "," + idxp + "]";
-//        return "[" + idx + "," + String.format("%.2f", value) + "," + nVisits + "]";
+        int idxp = parent == null ? -1 : parent.idx;
+        // return "[i=" + idx + ", q=" + value + ", n=" + nVisits + ", p=" + idxp + ",
+        // d=" + m_depth + "]";
+        // return "[" + idx + "," + String.format("%.2f", value) + "," + nVisits + "," +
+        // idxp + "]";
+        // return "[" + idx + "," + String.format("%.2f", value) + "," + nVisits + "]";
         return "[" + String.format("%.2f", value / (nVisits + epsilon)) + "]";
-//        return ""+nVisits;
+        // return ""+nVisits;
     }
 
     String treeToString() {
         ArrayList<String> treeLevels = new ArrayList<>();
-        ArrayList<TreeNode> treeNodes = traverse (this);
+        ArrayList<TreeNode> treeNodes = traverse(this);
 
         String tree = "----" + treeNodes.size() + "-----\n";
 
         for (TreeNode tn : treeNodes) {
-            String hex = Integer.toHexString((int)Math.round(tn.nVisits*1.7));
+            String hex = Integer.toHexString((int) Math.round(tn.nVisits * 1.7));
             tree += "A.node_attr['fillcolor']='#000000" + hex + "'" + "\n";
             if (tn.chosen) {
                 tree += "A.node_attr['color']='red'\n";
@@ -187,29 +194,30 @@ public class TreeNode {
         for (TreeNode tn : treeNodes) {
             for (TreeNode child : tn.children) {
                 if (child != null) {
-                    tree += "A.add_edge(\"" + tn.idx + "\", \"" + child.idx + "\", color=\"" + actColors[child.childIdx] + "\")" + "\n";
+                    tree += "A.add_edge(\"" + tn.idx + "\", \"" + child.idx + "\", color=\"" + actColors[child.childIdx]
+                            + "\")" + "\n";
                 }
             }
         }
 
-//        for (TreeNode node : treeNodes) {
-//            if (node.m_depth <= 0) { //root node
-//                treeLevels.add(node.toString());
-//            } else {
-//                if (node.m_depth < treeLevels.size()) {
-//                    String news = treeLevels.get(node.m_depth);
-//                    news += " " + node.toString();
-//                    treeLevels.set(node.m_depth, news);
-//                } else {
-//                    treeLevels.add(node.toString());
-//                }
-//            }
-//        }
-//
-//
-//        for (String s : treeLevels)
-//            tree += treeLevels.indexOf(s) + ": " + s + "\n";
-//
+        // for (TreeNode node : treeNodes) {
+        // if (node.m_depth <= 0) { //root node
+        // treeLevels.add(node.toString());
+        // } else {
+        // if (node.m_depth < treeLevels.size()) {
+        // String news = treeLevels.get(node.m_depth);
+        // news += " " + node.toString();
+        // treeLevels.set(node.m_depth, news);
+        // } else {
+        // treeLevels.add(node.toString());
+        // }
+        // }
+        // }
+        //
+        //
+        // for (String s : treeLevels)
+        // tree += treeLevels.indexOf(s) + ": " + s + "\n";
+        //
         tree += "---------\n";
 
         return tree;
@@ -229,8 +237,7 @@ public class TreeNode {
             // move to next node
             if (node.hasChildren()) {
                 node = node.getFirstChild();
-            }
-            else {    // leaf
+            } else { // leaf
                 // find the parent level
                 while (node != null && !node.equals(rootNode) && node.getNextSibling() == null) {
                     // use child-parent link to get to the parent level
@@ -248,7 +255,7 @@ public class TreeNode {
 
     @Override
     public boolean equals(Object obj) {
-        TreeNode node = (TreeNode)obj;
+        TreeNode node = (TreeNode) obj;
         return node.idx == this.idx;
     }
 }
